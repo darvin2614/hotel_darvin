@@ -1,0 +1,163 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Hotel Management{% endblock %}
+
+{% block page_title %}Hotel Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>All Hotels</h4>
+    <a href="{% url 'admin_panel:admin_add_hotel' %}" class="action-btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Hotel
+    </a>
+</div>
+
+<div class="table-container">
+    {% if page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Hotel Name</th>
+                        <th>City</th>
+                        <th>Address</th>
+                        <th>Rating</th>
+                        <th>Rooms</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hotel in page_obj.object_list %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if hotel.hotel_image_url %}
+                                    <img src="{{ hotel.hotel_image_url }}" 
+                                         alt="{{ hotel.name }}" 
+                                         class="rounded-circle me-3" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-hotel text-white"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold">{{ hotel.name }}</div>
+                                    <small class="text-muted">{{ hotel.description|truncatewords:10 }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <i class="fas fa-map-marker-alt text-muted me-1"></i>
+                            {{ hotel.city }}
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ hotel.address|truncatechars:30 }}</small>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="me-1">{{ hotel.rating|floatformat:1 }}</span>
+                                <div class="text-warning">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= hotel.rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ hotel.room_set.count }} rooms</span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'admin_panel:admin_edit_hotel' hotel.id %}" 
+                                   class="btn btn-sm btn-outline-primary" 
+                                   title="Edit Hotel">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:admin_add_room' %}" 
+                                   class="btn btn-sm btn-outline-success" 
+                                   title="Add Room">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:admin_delete_hotel' hotel.id %}" 
+                                   class="btn btn-sm btn-outline-danger" 
+                                   title="Delete Hotel">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="Hotel pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-hotel fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Hotels Found</h4>
+            <p class="text-muted">Start by adding your first hotel to the system.</p>
+            <a href="{% url 'admin_panel:admin_add_hotel' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add Your First Hotel
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Statistics Overview -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-hotel"></i>
+            </div>
+            <div class="stat-value">{{ page_obj.paginator.count }}</div>
+            <div class="stat-label">Total Hotels</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card warning">
+            <div class="stat-icon warning">
+                <i class="fas fa-bed"></i>
+            </div>
+            <div class="stat-value">{{ page_obj.object_list|add:"0"|default:"0" }}</div>
+            <div class="stat-label">Total Rooms</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

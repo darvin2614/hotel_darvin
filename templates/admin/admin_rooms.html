@@ -1,0 +1,216 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Room Management{% endblock %}
+
+{% block page_title %}Room Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>All Rooms</h4>
+    <a href="{% url 'admin_panel:admin_add_room' %}" class="action-btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Room
+    </a>
+</div>
+
+<div class="table-container">
+    {% if page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Hotel</th>
+                        <th>Type</th>
+                        <th>Price/Night</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for room in page_obj.object_list %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if room.room_image_url %}
+                                    <img src="{{ room.room_image_url }}" 
+                                         alt="{{ room.room_number }}" 
+                                         class="rounded me-3" 
+                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                    <div class="rounded bg-success d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 50px; height: 50px;">
+                                        <i class="fas fa-bed text-white"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold">{{ room.room_number }}</div>
+                                    <small class="text-muted">{{ room.description|truncatewords:8 }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if room.hotel.hotel_image_url %}
+                                    <img src="{{ room.hotel.hotel_image_url }}" 
+                                         alt="{{ room.hotel.name }}" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 30px; height: 30px; object-fit: cover;">
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold">{{ room.hotel.name }}</div>
+                                    <small class="text-muted">{{ room.hotel.city }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ room.get_room_type_display }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success">₹{{ room.price_per_night|floatformat:0 }}</div>
+                            <small class="text-muted">per night</small>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users text-muted me-2"></i>
+                                <span>{{ room.capacity }} guests</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if room.availability %}
+                                <span class="badge bg-success">Available</span>
+                            {% else %}
+                                <span class="badge bg-danger">Unavailable</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'admin_panel:admin_edit_room' room.id %}" 
+                                   class="btn btn-sm btn-outline-primary" 
+                                   title="Edit Room">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:admin_delete_room' room.id %}" 
+                                   class="btn btn-sm btn-outline-danger" 
+                                   title="Delete Room">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="Room pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-bed fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Rooms Found</h4>
+            <p class="text-muted">You need to add hotels first, then you can add rooms to them.</p>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{% url 'admin_panel:admin_add_room' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Your First Room
+                </a>
+                <a href="{% url 'admin_panel:admin_hotels' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-hotel me-2"></i>Manage Hotels
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Statistics Overview -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-bed"></i>
+            </div>
+            <div class="stat-value">{{ total_rooms }}</div>
+            <div class="stat-label">Total Rooms</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="stat-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-value">{{ available_rooms }}</div>
+            <div class="stat-label">Available Rooms</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card danger">
+            <div class="stat-icon danger">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-value">{{ unavailable_rooms }}</div>
+            <div class="stat-label">Unavailable Rooms</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-hotel"></i>
+            </div>
+            <div class="stat-value">{{ hotels_with_rooms }}</div>
+            <div class="stat-label">Hotels with Rooms</div>
+        </div>
+    </div>
+</div>
+
+<!-- Room Type Distribution -->
+{% if room_types %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="table-container">
+                <h5 class="mb-3">Room Type Distribution</h5>
+                <div class="row">
+                    {% for room_type_name, room_type_count in room_types.items %}
+                        <div class="col-md-2 col-sm-4 col-6 mb-3">
+                            <div class="text-center">
+                                <div class="stat-icon info mx-auto mb-2">
+                                    <i class="fas fa-bed"></i>
+                                </div>
+                                <h6>{{ room_type_name }}</h6>
+                                <span class="badge bg-info">{{ room_type_count }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Delete {{ object_type }}{% endblock %}
+
+{% block page_title %}Delete {{ object_type }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="table-container">
+            <div class="text-center">
+                <div class="text-danger mb-4">
+                    <i class="fas fa-exclamation-triangle fa-4x"></i>
+                </div>
+                
+                <h4 class="mb-3">Delete {{ object_type }}</h4>
+                
+                <div class="alert alert-warning mb-4">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. All data associated with this {{ object_type|lower }} will be permanently deleted.
+                </div>
+                
+                <div class="bg-light rounded p-3 mb-4">
+                    <h6 class="text-muted mb-2">{{ object_type }} Details:</h6>
+                    {% if object.name %}
+                        <div class="fw-bold">{{ object.name }}</div>
+                    {% elif object.username %}
+                        <div class="fw-bold">{{ object.username }}</div>
+                    {% elif object.room_number %}
+                        <div class="fw-bold">{{ object.room_number }}</div>
+                    {% elif object.id %}
+                        <div class="fw-bold">#{{ object.id }}</div>
+                    {% endif %}
+                    
+                    {% if object.hotel %}
+                        <small class="text-muted">Hotel: {{ object.hotel.name }}</small>
+                    {% endif %}
+                    
+                    {% if object.user %}
+                        <small class="text-muted">User: {{ object.user.username }}</small>
+                    {% endif %}
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url cancel_url %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Delete {{ object_type }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

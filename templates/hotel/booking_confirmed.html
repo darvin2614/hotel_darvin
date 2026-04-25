@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Confirmed - Hotel Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Header -->
+            <div class="text-center mb-5">
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-success rounded-circle p-4" style="width: 120px; height: 120px;">
+                        <i class="fas fa-check fa-3x text-white"></i>
+                    </div>
+                </div>
+                <h1 class="fw-bold mb-3 text-success">Booking Submitted Successfully!</h1>
+                <p class="lead text-muted">Your booking has been submitted and is now being processed</p>
+                <div class="d-inline-flex align-items-center text-warning">
+                    <i class="fas fa-clock me-2"></i>
+                    <span class="fw-semibold">Booking Status: {{ booking.status }}</span>
+                </div>
+            </div>
+
+            <!-- Booking Details Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-receipt me-2"></i>Booking Details
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Booking ID</label>
+                            <p class="fw-semibold mb-3">
+                                <i class="fas fa-hashtag text-primary me-1"></i>
+                                #{{ booking.id }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Hotel Name</label>
+                            <p class="fw-semibold mb-3">
+                                <i class="fas fa-hotel text-info me-1"></i>
+                                {{ booking.hotel.name }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Room Type</label>
+                            <p class="fw-semibold mb-3">
+                                <i class="fas fa-bed text-success me-1"></i>
+                                {{ booking.room.room_type }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Check-in Date</label>
+                            <p class="fw-semibold mb-3">
+                                <i class="fas fa-calendar-check text-primary me-1"></i>
+                                {{ booking.check_in }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Check-out Date</label>
+                            <p class="fw-semibold mb-3">
+                                <i class="fas fa-calendar-times text-danger me-1"></i>
+                                {{ booking.check_out }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Number of Nights</label>
+                            <p class="fw-semibold mb-3">
+                                <i class="fas fa-moon text-warning me-1"></i>
+                                <span id="nights-count">Calculating...</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small mb-1">Total Amount</label>
+                            <p class="fs-5 fw-bold text-success mb-0">
+                                <i class="fas fa-money-bill-wave me-1"></i>
+                                ${{ booking.total_amount }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Information -->
+            <div class="alert alert-info border-2 shadow-sm" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-info-circle fa-lg me-3"></i>
+                    <div>
+                        <strong>Important Information:</strong><br>
+                        • Your booking has been confirmed and is being processed.<br>
+                        • You will receive a confirmation email shortly.<br>
+                        • You can view all your bookings in "My Bookings" section.<br>
+                        • For any changes or cancellations, please contact our support team.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
+                <a href="{% url 'my_bookings' %}" class="btn btn-primary btn-lg px-4 py-3 shadow-sm">
+                    <i class="fas fa-list me-2"></i>
+                    <span class="fw-semibold">Go to My Bookings</span>
+                </a>
+                
+                <a href="{% url 'hotel_list' %}" class="btn btn-outline-success btn-lg px-4 py-3 shadow-sm">
+                    <i class="fas fa-hotel me-2"></i>
+                    <span class="fw-semibold">Book Another Room</span>
+                </a>
+                
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg px-4 py-3 shadow-sm">
+                    <i class="fas fa-home me-2"></i>
+                    <span class="fw-semibold">Back to Home</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-2 {
+    border-width: 2px !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calculate number of nights
+    {% if booking.check_in and booking.check_out %}
+        const checkIn = new Date('{{ booking.check_in|date:"Y-m-d" }}');
+        const checkOut = new Date('{{ booking.check_out|date:"Y-m-d" }}');
+        const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+        const nightsElement = document.getElementById('nights-count');
+        if (nightsElement) {
+            nightsElement.textContent = nights + ' night' + (nights !== 1 ? 's' : '');
+        }
+    {% endif %}
+});
+</script>
+{% endblock %}

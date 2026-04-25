@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Book {{ room.room_type }} - {{ room.hotel.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="booking-form">
+                <h2 class="mb-4">Book Your Room</h2>
+                
+                <!-- Room Information -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {% if room.room_image_url %}
+                                <img src="{{ room.room_image_url }}" class="img-fluid rounded" alt="{{ room.room_type }}">
+                            {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <h4>{{ room.room_type }} Room</h4>
+                                <p class="text-muted">{{ room.hotel.name }} - {{ room.hotel.city }}</p>
+                                <p><strong>Room {{ room.room_number }}</strong></p>
+                                <p>{{ room.description|truncatewords:20 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-users me-2 text-info"></i>
+                                        {{ room.capacity }} guests
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-tag me-2 text-success"></i>
+                                        <strong>${{ room.price_per_night }}/night</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                <form method="post" action="{% url 'booking' room.id %}" id="bookingForm">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.check_in.id_for_label }}" class="form-label">Check-in Date</label>
+                            {{ form.check_in }}
+                            {% if form.check_in.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.check_in.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.check_out.id_for_label }}" class="form-label">Check-out Date</label>
+                            {{ form.check_out }}
+                            {% if form.check_out.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.check_out.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger mt-3">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary btn-custom">
+                            <i class="fas fa-calendar-check me-2"></i>Proceed with Booking
+                        </button>
+                        <a href="{% url 'room_detail' room.id %}" class="btn btn-outline-secondary btn-custom ms-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Room
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="booking-summary">
+                <h4>Booking Summary</h4>
+                <div class="summary-item">
+                    <span>Hotel:</span>
+                    <span>{{ room.hotel.name }}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Room:</span>
+                    <span>{{ room.room_type }} ({{ room.room_number }})</span>
+                </div>
+                <div class="summary-item">
+                    <span>Price/night:</span>
+                    <span>${{ room.price_per_night }}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Capacity:</span>
+                    <span>{{ room.capacity }} guests</span>
+                </div>
+                <div class="summary-item" id="nightsSummary" style="display: none;">
+                    <span>Nights:</span>
+                    <span id="nightsCount">0</span>
+                </div>
+                <div class="summary-item" id="totalSummary" style="display: none;">
+                    <span>Total Amount:</span>
+                    <span id="totalAmount">$0</span>
+                </div>
+            </div>
+            
+            <!-- Booking Information -->
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Booking Information</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Free cancellation up to 24 hours before check-in</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Best price guarantee</li>
+                        <li><i class="fas fa-check text-success me-2"></i>24/7 customer support</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Secure payment processing</li>
+                    </ul>
+                    <a href="{% url 'booking_verify' room.id %}">Proceed to booking verification</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkInInput = document.getElementById('{{ form.check_in.id_for_label }}');
+    const checkOutInput = document.getElementById('{{ form.check_out.id_for_label }}');
+    const nightsSummary = document.getElementById('nightsSummary');
+    const totalSummary = document.getElementById('totalSummary');
+    const nightsCount = document.getElementById('nightsCount');
+    const totalAmount = document.getElementById('totalAmount');
+    const pricePerNight = {{ room.price_per_night }};
+
+    function calculateTotal() {
+        const checkIn = new Date(checkInInput.value);
+        const checkOut = new Date(checkOutInput.value);
+        
+        if (checkIn && checkOut && checkOut > checkIn) {
+            const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+            const total = nights * pricePerNight;
+            
+            nightsCount.textContent = nights;
+            totalAmount.textContent = `₹${total.toFixed(2)}`;
+            
+            nightsSummary.style.display = 'flex';
+            totalSummary.style.display = 'flex';
+        } else {
+            nightsSummary.style.display = 'none';
+            totalSummary.style.display = 'none';
+        }
+    }
+
+    checkInInput.addEventListener('change', calculateTotal);
+    checkOutInput.addEventListener('change', calculateTotal);
+    
+    // Set minimum check-out date when check-in date changes
+    checkInInput.addEventListener('change', function() {
+        const checkInDate = new Date(this.value);
+        const minCheckOut = new Date(checkInDate);
+        minCheckOut.setDate(minCheckOut.getDate() + 1);
+        checkOutInput.min = minCheckOut.toISOString().split('T')[0];
+        
+        // Clear check-out if it's before new minimum
+        if (new Date(checkOutInput.value) <= checkInDate) {
+            checkOutInput.value = '';
+        }
+    });
+});
+</script>
+{% endblock %}

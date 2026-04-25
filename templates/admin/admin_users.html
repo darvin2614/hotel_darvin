@@ -1,0 +1,312 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}User Management{% endblock %}
+
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>All Users</h4>
+                <div class="d-flex gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter me-2"></i>Filter Users
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="?">All Users</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="?is_active=true">Active Users</a></li>
+                            <li><a class="dropdown-item" href="?is_active=false">Inactive Users</a></li>
+                            <li><a class="dropdown-item" href="?is_staff=true">Staff Users</a></li>
+                            <li><a class="dropdown-item" href="?is_superuser=true">Superusers</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Last Login</th>
+                        <th>Bookings</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_stat in page_obj.object_list %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-info d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 40px; height: 40px;">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ user_stat.user.username }}</div>
+                                    {% if user_stat.user.get_full_name %}
+                                        <small class="text-muted">{{ user_stat.user.get_full_name }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-envelope text-muted me-2"></i>
+                                <span>{{ user_stat.user.email }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if user_stat.user.is_superuser %}
+                                <span class="badge bg-danger">Superuser</span>
+                            {% else %}
+                                <span class="badge bg-primary">User</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user_stat.user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user_stat.user.date_joined %}
+                                <div class="fw-bold">{{ user_stat.user.date_joined|date:"M d, Y" }}</div>
+                                <small class="text-muted">{{ user_stat.user.date_joined|date:"H:i" }}</small>
+                            {% else %}
+                                <small class="text-muted">Unknown</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user_stat.user.last_login %}
+                                <div class="fw-bold">{{ user_stat.user.last_login|date:"M d, Y" }}</div>
+                                <small class="text-muted">{{ user_stat.user.last_login|date:"H:i" }}</small>
+                            {% else %}
+                                <small class="text-muted">Never</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div>
+                                <span class="badge bg-primary">{{ user_stat.total_bookings }} bookings</span>
+                                {% if user_stat.latest_booking %}
+                                    <br><small class="text-muted">Latest: #{{ user_stat.latest_booking.id }} ({{ user_stat.latest_booking.status }})</small>
+                                {% else %}
+                                    <br><small class="text-muted">No bookings</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                {% if user_stat.user.is_active %}
+                                    <a href="{% url 'admin_panel:admin_toggle_user' user_stat.user.id %}" 
+                                       class="btn btn-sm btn-outline-warning" 
+                                       title="Deactivate User"
+                                       onclick="return confirm('Deactivate this user?')">
+                                        <i class="fas fa-user-slash"></i>
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'admin_panel:admin_toggle_user' user_stat.user.id %}" 
+                                       class="btn btn-sm btn-outline-success" 
+                                       title="Activate User"
+                                       onclick="return confirm('Activate this user?')">
+                                        <i class="fas fa-user-check"></i>
+                                    </a>
+                                {% endif %}
+                                {% if not user_stat.user.is_superuser %}
+                                    <a href="{% url 'admin_panel:admin_delete_user' user_stat.user.id %}" 
+                                       class="btn btn-sm btn-outline-danger" 
+                                       title="Delete User"
+                                       onclick="return confirm('Delete this user permanently? This action cannot be undone.')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="User pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-users fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Users Found</h4>
+            <p class="text-muted">No users found in the system.</p>
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-external-link-alt me-2"></i>Go to Main Website
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Statistics Overview -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="stat-icon success">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-value">{{ active_users }}</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <div class="stat-icon warning">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="stat-value">{{ staff_users }}</div>
+            <div class="stat-label">Staff Users</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card danger">
+            <div class="stat-icon danger">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="stat-value">{{ superusers }}</div>
+            <div class="stat-label">Superusers</div>
+        </div>
+    </div>
+</div>
+
+<!-- User Activity Summary -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="table-container">
+            <h5 class="mb-3">User Activity Summary</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Recent Registrations</h6>
+                    <div class="list-group">
+                        {% for user_data in users_with_stats|slice:":5" %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold">{{ user_data.user.username }}</div>
+                                    <small class="text-muted">{{ user_data.user.email }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">{{ user_data.user.date_joined|timesince }} ago</small>
+                                    {% if user_data.total_bookings > 0 %}
+                                        <div class="badge bg-primary">{{ user_data.total_bookings }} bookings</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6>Most Active Users</h6>
+                    <div class="list-group">
+                        {% for user_data in most_active_users %}
+                            {% if user_data.total_bookings > 0 %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold">{{ user_data.user.username }}</div>
+                                        <small class="text-muted">{{ user_data.user.email }}</small>
+                                    </div>
+                                    <span class="badge bg-primary">{{ user_data.total_bookings }} bookings</span>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="table-container">
+            <h5 class="mb-3">Quick Actions</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="?is_active=true" class="action-btn btn-success">
+                    <i class="fas fa-user-check"></i> View Active Users ({{ active_users_count }})
+                </a>
+                <a href="?is_active=false" class="action-btn btn-secondary">
+                    <i class="fas fa-user-slash"></i> View Inactive Users ({{ inactive_users_count }})
+                </a>
+                <a href="?is_staff=true" class="action-btn btn-warning">
+                    <i class="fas fa-user-tie"></i> View Staff Users ({{ staff_users_count }})
+                </a>
+                <a href="{% url 'admin_panel:admin_bookings' %}" class="action-btn btn-primary">
+                    <i class="fas fa-calendar-check"></i> View All Bookings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to user rows
+    const userRows = document.querySelectorAll('tbody tr');
+    userRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
+        });
+        row.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    });
+});
+</script>
+{% endblock %}

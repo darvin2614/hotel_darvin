@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Confirmed - Hotel Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Header -->
+            <div class="text-center mb-5">
+                <div class="mb-4">
+                    <div class="rounded-circle bg-success d-inline-flex align-items-center justify-content-center" 
+                         style="width: 100px; height: 100px;">
+                        <i class="fas fa-check fa-3x text-white"></i>
+                    </div>
+                </div>
+                <h1 class="fw-bold mb-3 text-success">Booking Confirmed!</h1>
+                <p class="lead text-muted">Your booking has been successfully submitted and is now pending confirmation.</p>
+                <div class="d-inline-flex align-items-center text-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span class="fw-semibold">Booking ID: #{{ booking.id }}</span>
+                </div>
+            </div>
+
+            <!-- Booking Details Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-list me-2"></i>Booking Details
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <!-- Hotel Information -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Hotel Information</h6>
+                            <div class="mb-3">
+                                <strong>Hotel:</strong> {{ booking.hotel.name }}<br>
+                                <small class="text-muted">{{ booking.hotel.city }}</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Room Information -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Room Information</h6>
+                            <div class="mb-3">
+                                <strong>Room:</strong> {{ booking.room.get_room_type_display }} ({{ booking.room.room_number }})<br>
+                                <small class="text-muted">Capacity: {{ booking.room.capacity }} guests</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Booking Dates -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Booking Dates</h6>
+                            <div class="mb-3">
+                                <strong>Check-in:</strong> {{ booking.check_in|date:"F d, Y" }}<br>
+                                <strong>Check-out:</strong> {{ booking.check_out|date:"F d, Y" }}<br>
+                                <small class="text-muted">{{ booking.nights }} night{{ booking.nights|pluralize }}</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Guest Information -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Guest Information</h6>
+                            <div class="mb-3">
+                                <strong>Name:</strong> {{ booking.user.get_full_name|default:booking.user.username }}<br>
+                                <strong>Email:</strong> {{ booking.user.email }}<br>
+                                <small class="text-muted">Booked on: {{ booking.created_at|date:"F d, Y" }}</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Information -->
+                        <div class="col-12">
+                            <h6 class="text-muted mb-3">Payment Information</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Price per Night:</strong> 
+                                        <span class="text-primary">₹{{ booking.room.price_per_night }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Total Amount:</strong> 
+                                        <span class="text-success fw-bold fs-5">₹{{ booking.total_amount }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-warning text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Booking Status
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-clock text-white"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Pending Confirmation</h6>
+                                    <p class="text-muted mb-0">Your booking is currently pending confirmation by the hotel staff.</p>
+                                    <p class="text-muted mb-0">You will receive an email once the booking is confirmed.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{% url 'my_bookings' %}" class="btn btn-primary btn-lg px-4 py-3 shadow-sm">
+                    <i class="fas fa-list me-2"></i>
+                    <span class="fw-semibold">View My Bookings</span>
+                </a>
+                
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg px-4 py-3 shadow-sm">
+                    <i class="fas fa-home me-2"></i>
+                    <span class="fw-semibold">Back to Home</span>
+                </a>
+                
+                <a href="{% url 'hotel_list' %}" class="btn btn-outline-info btn-lg px-4 py-3 shadow-sm">
+                    <i class="fas fa-search me-2"></i>
+                    <span class="fw-semibold">Browse More Hotels</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-header {
+    border-bottom: none;
+}
+</style>
+{% endblock %}

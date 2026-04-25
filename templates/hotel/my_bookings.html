@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings - Hotel Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">My Bookings</h1>
+        <p class="lead text-muted">Manage your hotel bookings</p>
+    </div>
+
+    {% if bookings %}
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Hotel</th>
+                        <th>Room</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Nights</th>
+                        <th>Guests</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td><strong>#{{ booking.id }}</strong></td>
+                        <td>
+                            <div>
+                                <strong>{{ booking.hotel.name }}</strong><br>
+                                <small class="text-muted">{{ booking.hotel.city }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                {{ booking.room.get_room_type_display }}<br>
+                                <small class="text-muted">Room {{ booking.room.room_number }}</small>
+                            </div>
+                        </td>
+                        <td>{{ booking.check_in|date:"M d, Y" }}</td>
+                        <td>{{ booking.check_out|date:"M d, Y" }}</td>
+                        <td>{{ booking.nights }}</td>
+                        <td>{{ booking.room.capacity }} guests</td>
+                        <td><strong>₹{{ booking.total_amount|floatformat:0 }}</strong></td>
+                        <td>
+                            <span class="status-badge status-{{ booking.status|lower }}">
+                                {{ booking.status }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if booking.can_cancel %}
+                                <a href="{% url 'cancel_booking' booking.id %}" 
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </a>
+                            {% else %}
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    {% if booking.status == 'Cancelled' %}
+                                        Cancelled
+                                    {% elif booking.status == 'Completed' %}
+                                        Completed
+                                    {% else %}
+                                        Cannot Cancel
+                                    {% endif %}
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Booking Statistics -->
+        <div class="row mt-5">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check text-primary"></i>
+                    <h3>{{ total_bookings }}</h3>
+                    <p>Total Bookings</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-clock text-warning"></i>
+                    <h3>{{ pending_bookings }}</h3>
+                    <p>Pending</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <h3>{{ confirmed_bookings }}</h3>
+                    <p>Confirmed</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-times-circle text-danger"></i>
+                    <h3>{{ cancelled_bookings }}</h3>
+                    <p>Cancelled</p>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <h4>No Bookings Found</h4>
+            <p class="text-muted">You haven't made any bookings yet.</p>
+            <a href="{% url 'hotel_list' %}" class="btn btn-primary btn-custom">
+                <i class="fas fa-search me-2"></i>Browse Hotels
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

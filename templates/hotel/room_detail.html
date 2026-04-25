@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ room.room_type }} - {{ room.hotel.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Room Header -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <div class="room-detail-header">
+                <h1 class="display-5 fw-bold mb-3">{{ room.room_type }} Room</h1>
+                <p class="lead text-muted mb-3">
+                    <i class="fas fa-hotel me-2 text-primary"></i>{{ room.hotel.name }}
+                </p>
+                <p class="text-muted mb-3">
+                    <i class="fas fa-map-marker-alt me-2 text-danger"></i>
+                    {{ room.hotel.address }}, {{ room.hotel.city }}
+                </p>
+                <div class="mb-3">
+                    <span class="room-type-pill">Room {{ room.room_number }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            {% if room.room_image_url %}
+                    <img src="{{ room.room_image_url }}" class="img-fluid rounded shadow" alt="{{ room.room_type }}">
+                {% endif %}
+        </div>
+    </div>
+
+    <!-- Room Details -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Room Details</h3>
+                    <p class="card-text">{{ room.description }}</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <i class="fas fa-users me-2 text-info fa-2x"></i>
+                                <div>
+                                    <strong>Capacity</strong><br>
+                                    {{ room.capacity }} person{{ room.capacity|pluralize }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <i class="fas fa-tag me-2 text-success fa-2x"></i>
+                                <div>
+                                    <strong>Price</strong><br>
+                                    ${{ room.price_per_night }}/night
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <i class="fas fa-door-open me-2 text-primary fa-2x"></i>
+                                <div>
+                                    <strong>Room Number</strong><br>
+                                    {{ room.room_number }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle me-2 text-success fa-2x"></i>
+                                <div>
+                                    <strong>Availability</strong><br>
+                                    {% if room.availability %}
+                                        <span class="badge bg-success">Available</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Not Available</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Booking Information</h4>
+                    
+                    <div class="booking-summary">
+                        <h5>{{ room.room_type }} Room</h5>
+                        <div class="summary-item">
+                            <span>Hotel:</span>
+                            <span>{{ room.hotel.name }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Room:</span>
+                            <span>{{ room.room_number }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Price per night:</span>
+                            <span>${{ room.price_per_night }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Capacity:</span>
+                            <span>{{ room.capacity }} guests</span>
+                        </div>
+                    </div>
+                    
+                    {% if room.availability %}
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'booking' room.id %}" class="btn btn-primary btn-custom w-100 mt-3">
+                                <i class="fas fa-calendar-plus me-2"></i>Book This Room
+                            </a>
+                        {% else %}
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Please <a href="{% url 'login' %}">login</a> to book this room.
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-danger mt-3">
+                            <i class="fas fa-times-circle me-2"></i>
+                            This room is currently not available for booking.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hotel Information -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">About {{ room.hotel.name }}</h3>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="card-text">{{ room.hotel.description }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="rating mb-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= room.hotel.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-2">{{ room.hotel.rating }} / 5.0</span>
+                            </div>
+                            <div class="mb-2">
+                                <span class="price-badge">{{ room.hotel.price_range }}</span>
+                            </div>
+                            <a href="{% url 'hotel_detail' room.hotel.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-hotel me-1"></i>View Hotel Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <a href="{% url 'room_list' %}" class="btn btn-outline-secondary btn-custom">
+                <i class="fas fa-arrow-left me-2"></i>Back to Rooms
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

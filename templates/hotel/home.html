@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Hotel Management System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1>Find Your Perfect Stay</h1>
+                <p>Discover amazing hotels and rooms in top cities across India. Book your dream vacation with ease.</p>
+                <a href="{% url 'hotel_list' %}" class="btn btn-light btn-lg btn-custom">
+                    <i class="fas fa-search me-2"></i>Explore Hotels
+                </a>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <i class="fas fa-hotel fa-3x mb-2"></i>
+                            <h4>{{ total_hotels }}+ Hotels</h4>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <i class="fas fa-bed fa-3x mb-2"></i>
+                            <h4>{{ total_rooms }}+ Rooms</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Hotels -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Featured Hotels</h2>
+            <p class="lead text-muted">Discover our handpicked selection of premium hotels</p>
+        </div>
+        
+        <div class="row g-4">
+            {% for hotel in featured_hotels %}
+            <div class="col-lg-4 col-md-6">
+                <div class="hotel-card">
+                    <img src="{{ hotel.image }}" class="card-img-top" alt="{{ hotel.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ hotel.name }}</h5>
+                        <p class="card-text">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ hotel.city }}
+                        </p>
+                        <div class="rating mb-2">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= hotel.rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ms-2">{{ hotel.rating }}</span>
+                        </div>
+                        <p class="card-text">{{ hotel.description|truncatewords:20 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price-badge">{{ hotel.price_range }}</span>
+                            <a href="{% url 'hotel_detail' hotel.id %}" class="btn btn-primary btn-sm">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center">
+                    <p class="lead">No hotels available yet. Check back soon!</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'hotel_list' %}" class="btn btn-primary btn-lg btn-custom">
+                <i class="fas fa-th me-2"></i>View All Hotels
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Why Choose HotelHub?</h2>
+            <p class="lead text-muted">Experience the best hotel booking platform</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 text-center">
+                <div class="feature-box">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h4>Secure Booking</h4>
+                    <p>Your bookings are safe and secure with our advanced security measures.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="feature-box">
+                    <i class="fas fa-dollar-sign fa-3x text-success mb-3"></i>
+                    <h4>Best Prices</h4>
+                    <p>Get the best deals and competitive prices for your perfect stay.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="feature-box">
+                    <i class="fas fa-headset fa-3x text-info mb-3"></i>
+                    <h4>24/7 Support</h4>
+                    <p>Our customer support team is available round the clock to help you.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

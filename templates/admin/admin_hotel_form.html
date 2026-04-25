@@ -1,0 +1,200 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>{{ title }}</h4>
+                <a href="{% url 'admin_panel:admin_hotels' %}" class="action-btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Hotels
+                </a>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                <i class="fas fa-hotel me-2"></i>Hotel Name
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.city.id_for_label }}" class="form-label">
+                                <i class="fas fa-map-marker-alt me-2"></i>City
+                            </label>
+                            {{ form.city }}
+                            {% if form.city.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.city.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="{{ form.address.id_for_label }}" class="form-label">
+                        <i class="fas fa-home me-2"></i>Address
+                    </label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.address.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        <i class="fas fa-info-circle me-2"></i>Description
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.description.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.hotel_image_url.id_for_label }}" class="form-label">
+                                <i class="fas fa-image me-2"></i>Hotel Image URL
+                            </label>
+                            {{ form.hotel_image_url }}
+                            {% if form.hotel_image_url.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.hotel_image_url.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">Enter a URL for the hotel image (optional)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.rating.id_for_label }}" class="form-label">
+                                <i class="fas fa-star me-2"></i>Rating
+                            </label>
+                            {{ form.rating }}
+                            {% if form.rating.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.rating.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">1.0 - 5.0</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image Preview -->
+                {% if hotel.hotel_image_url %}
+                    <div class="form-group mb-3">
+                        <label class="form-label">Current Image Preview</label>
+                        <div>
+                            <img src="{{ hotel.hotel_image_url }}" 
+                                 alt="{{ hotel.name }}" 
+                                 class="rounded" 
+                                 style="max-width: 200px; max-height: 150px; object-fit: cover;">
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'admin_panel:admin_hotels' %}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>{{ action }} Hotel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Help Section -->
+    <div class="col-lg-4">
+        <div class="table-container">
+            <h5 class="mb-3">
+                <i class="fas fa-info-circle me-2"></i>Help & Tips
+            </h5>
+            
+            <div class="mb-4">
+                <h6>Hotel Information</h6>
+                <ul class="list-unstyled small text-muted">
+                    <li><i class="fas fa-check text-success me-2"></i>Enter complete hotel name</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Provide accurate address</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Add detailed description</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Set appropriate rating (1-5)</li>
+                </ul>
+            </div>
+            
+            <div class="mb-4">
+                <h6>Image Guidelines</h6>
+                <ul class="list-unstyled small text-muted">
+                    <li><i class="fas fa-check text-success me-2"></i>Use high-quality images</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Recommended size: 800x600px</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Use direct image URLs</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Format: JPG, PNG, WebP</li>
+                </ul>
+            </div>
+            
+            <div class="mb-4">
+                <h6>Status Information</h6>
+                <div class="alert alert-info small">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Hotels are automatically active when created and visible to users.
+                </div>
+            </div>
+            
+            {% if hotel %}
+                <div class="alert alert-warning small">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> Editing hotel information may affect existing bookings and room availability.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-format rating field
+    const ratingField = document.getElementById('{{ form.rating.id_for_label }}');
+    if (ratingField) {
+        ratingField.addEventListener('input', function() {
+            let value = parseFloat(this.value);
+            if (value > 5) this.value = 5;
+            if (value < 1) this.value = 1;
+        });
+    }
+    
+    // Auto-capitalize hotel name
+    const nameField = document.getElementById('{{ form.name.id_for_label }}');
+    if (nameField) {
+        nameField.addEventListener('input', function() {
+            this.value = this.value.replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+        });
+    }
+});
+</script>
+{% endblock %}

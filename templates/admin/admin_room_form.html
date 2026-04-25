@@ -1,0 +1,262 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>{{ title }}</h4>
+                <a href="{% url 'admin_panel:admin_rooms' %}" class="action-btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Rooms
+                </a>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.hotel.id_for_label }}" class="form-label">
+                                <i class="fas fa-hotel me-2"></i>Hotel
+                            </label>
+                            {{ form.hotel }}
+                            {% if form.hotel.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.hotel.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.room_number.id_for_label }}" class="form-label">
+                                <i class="fas fa-door-open me-2"></i>Room Number
+                            </label>
+                            {{ form.room_number }}
+                            {% if form.room_number.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.room_number.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">e.g., 101, A201, Suite-1</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.room_type.id_for_label }}" class="form-label">
+                                <i class="fas fa-bed me-2"></i>Room Type
+                            </label>
+                            {{ form.room_type }}
+                            {% if form.room_type.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.room_type.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.price_per_night.id_for_label }}" class="form-label">
+                                <i class="fas fa-dollar-sign me-2"></i>Price per Night
+                            </label>
+                            {{ form.price_per_night }}
+                            {% if form.price_per_night.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.price_per_night.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">Amount in INR</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.capacity.id_for_label }}" class="form-label">
+                                <i class="fas fa-users me-2"></i>Capacity
+                            </label>
+                            {{ form.capacity }}
+                            {% if form.capacity.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.capacity.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">Number of guests</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.availability.id_for_label }}" class="form-label">
+                                <i class="fas fa-toggle-on me-2"></i>Availability
+                            </label>
+                            <div class="form-check mt-2">
+                                {{ form.availability }}
+                                <label class="form-check-label" for="{{ form.availability.id_for_label }}">
+                                    Available for booking
+                                </label>
+                            </div>
+                            {% if form.availability.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.availability.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="{{ form.room_image_url.id_for_label }}" class="form-label">
+                        <i class="fas fa-image me-2"></i>Room Image URL
+                    </label>
+                    {{ form.room_image_url }}
+                    {% if form.room_image_url.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.room_image_url.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <small class="text-muted">Enter a URL for the room image (optional)</small>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        <i class="fas fa-info-circle me-2"></i>Description
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.description.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <small class="text-muted">Room amenities and features (optional)</small>
+                </div>
+                
+                <!-- Image Preview -->
+                {% if room.room_image_url %}
+                    <div class="form-group mb-3">
+                        <label class="form-label">Current Image Preview</label>
+                        <div>
+                            <img src="{{ room.room_image_url }}" 
+                                 alt="{{ room.room_number }}" 
+                                 class="rounded" 
+                                 style="max-width: 300px; max-height: 200px; object-fit: cover;">
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'admin_panel:admin_rooms' %}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>{{ action }} Room
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Help Section -->
+    <div class="col-lg-4">
+        <div class="table-container">
+            <h5 class="mb-3">
+                <i class="fas fa-info-circle me-2"></i>Help & Tips
+            </h5>
+            
+            <div class="mb-4">
+                <h6>Room Information</h6>
+                <ul class="list-unstyled small text-muted">
+                    <li><i class="fas fa-check text-success me-2"></i>Choose appropriate hotel</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Use unique room numbers</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Set competitive pricing</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Specify correct capacity</li>
+                </ul>
+            </div>
+            
+            <div class="mb-4">
+                <h6>Room Types</h6>
+                <div class="small text-muted">
+                    <div><strong>Single:</strong> 1 guest, basic amenities</div>
+                    <div><strong>Double:</strong> 2 guests, comfortable</div>
+                    <div><strong>Deluxe:</strong> 2-3 guests, premium</div>
+                    <div><strong>Suite:</strong> 3-4 guests, luxury</div>
+                    <div><strong>Penthouse:</strong> 4+ guests, ultra-luxury</div>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h6>Pricing Guidelines</h6>
+                <ul class="list-unstyled small text-muted">
+                    <li><i class="fas fa-check text-success me-2"></i>Research local rates</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Consider room type</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Factor in amenities</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Seasonal pricing</li>
+                </ul>
+            </div>
+            
+            <div class="mb-4">
+                <h6>Status Information</h6>
+                <div class="alert alert-info small">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Available:</strong> Room can be booked<br>
+                    <strong>Unavailable:</strong> Room is temporarily closed
+                </div>
+            </div>
+            
+            {% if room %}
+                <div class="alert alert-warning small">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> Editing room information may affect existing bookings.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-format price field
+    const priceField = document.getElementById('{{ form.price_per_night.id_for_label }}');
+    if (priceField) {
+        priceField.addEventListener('input', function() {
+            let value = parseFloat(this.value);
+            if (value < 0) this.value = 0;
+            // Round to 2 decimal places
+            this.value = parseFloat(this.value).toFixed(2);
+        });
+    }
+    
+    // Auto-format capacity field
+    const capacityField = document.getElementById('{{ form.capacity.id_for_label }}');
+    if (capacityField) {
+        capacityField.addEventListener('input', function() {
+            let value = parseInt(this.value);
+            if (value > 10) this.value = 10;
+            if (value < 1) this.value = 1;
+        });
+    }
+    
+    // Auto-format room number
+    const roomNumberField = document.getElementById('{{ form.room_number.id_for_label }}');
+    if (roomNumberField) {
+        roomNumberField.addEventListener('input', function() {
+            // Auto-uppercase room numbers
+            this.value = this.value.toUpperCase();
+        });
+    }
+});
+</script>
+{% endblock %}

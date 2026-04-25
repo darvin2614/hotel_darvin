@@ -1,0 +1,255 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-hotel"></i>
+            </div>
+            <div class="stat-value">{{ total_hotels }}</div>
+            <div class="stat-label">Total Hotels</div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card success">
+            <div class="stat-icon success">
+                <i class="fas fa-bed"></i>
+            </div>
+            <div class="stat-value">{{ total_rooms }}</div>
+            <div class="stat-label">Total Rooms</div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card warning">
+            <div class="stat-icon warning">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-value">{{ total_bookings }}</div>
+            <div class="stat-label">Total Bookings</div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card danger">
+            <div class="stat-icon danger">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Status Overview -->
+<div class="row mb-4">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-value">{{ pending_bookings }}</div>
+            <div class="stat-label">Pending Bookings</div>
+            <div class="mt-3">
+                <a href="{% url 'admin_panel:admin_bookings' %}?status=Pending" class="action-btn btn-warning">
+                    <i class="fas fa-eye"></i> View All
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="stat-card success">
+            <div class="stat-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-value">{{ confirmed_bookings }}</div>
+            <div class="stat-label">Confirmed Bookings</div>
+            <div class="mt-3">
+                <a href="{% url 'admin_panel:admin_bookings' %}?status=Confirmed" class="action-btn btn-success">
+                    <i class="fas fa-eye"></i> View All
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-value">₹{{ monthly_revenue|floatformat:0 }}</div>
+            <div class="stat-label">Monthly Revenue</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="table-container">
+            <h4 class="mb-3">Quick Actions</h4>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'admin_panel:admin_add_hotel' %}" class="action-btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Hotel
+                </a>
+                <a href="{% url 'admin_panel:admin_add_room' %}" class="action-btn btn-success">
+                    <i class="fas fa-plus"></i> Add Room
+                </a>
+                <a href="{% url 'admin_panel:admin_bookings' %}?status=Pending" class="action-btn btn-warning">
+                    <i class="fas fa-clock"></i> Pending Bookings
+                </a>
+                <a href="{% url 'admin_panel:admin_users' %}" class="action-btn btn-info">
+                    <i class="fas fa-users"></i> Manage Users
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Bookings -->
+    <div class="col-xl-8 mb-4">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Recent Bookings</h4>
+                <a href="{% url 'admin_panel:admin_bookings' %}" class="action-btn btn-primary">
+                    <i class="fas fa-list"></i> View All
+                </a>
+            </div>
+            
+            {% if recent_bookings %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>User</th>
+                                <th>Hotel</th>
+                                <th>Room</th>
+                                <th>Check-in</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in recent_bookings %}
+                            <tr>
+                                <td>#{{ booking.id }}</td>
+                                <td>{{ booking.user.username }}</td>
+                                <td>{{ booking.hotel.name }}</td>
+                                <td>{{ booking.room.room_number }}</td>
+                                <td>{{ booking.check_in|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if booking.status == 'Pending' %}
+                                        <span class="badge bg-warning">{{ booking.status }}</span>
+                                    {% elif booking.status == 'Confirmed' %}
+                                        <span class="badge bg-success">{{ booking.status }}</span>
+                                    {% elif booking.status == 'Cancelled' %}
+                                        <span class="badge bg-danger">{{ booking.status }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ booking.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>₹{{ booking.total_amount|floatformat:0 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No recent bookings found.</p>
+                    <a href="{% url 'admin_panel:admin_add_hotel' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i> Add Your First Hotel
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Recent Users -->
+    <div class="col-xl-4 mb-4">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Recent Users</h4>
+                <a href="{% url 'admin_panel:admin_users' %}" class="action-btn btn-primary">
+                    <i class="fas fa-list"></i> View All
+                </a>
+            </div>
+            
+            {% if recent_users %}
+                <div class="list-group">
+                    {% for user in recent_users %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">{{ user.username }}</div>
+                            <small class="text-muted">{{ user.email }}</small>
+                        </div>
+                        <div>
+                            {% if user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No users registered yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- System Overview -->
+<div class="row">
+    <div class="col-12">
+        <div class="table-container">
+            <h4 class="mb-3">System Overview</h4>
+            <div class="row">
+                <div class="col-md-3 text-center mb-3">
+                    <div class="stat-icon primary mx-auto mb-2">
+                        <i class="fas fa-hotel"></i>
+                    </div>
+                    <h5>{{ total_hotels }}</h5>
+                    <p class="text-muted mb-0">Hotels</p>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="stat-icon success mx-auto mb-2">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    <h5>{{ total_rooms }}</h5>
+                    <p class="text-muted mb-0">Rooms</p>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="stat-icon warning mx-auto mb-2">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h5>{{ total_bookings }}</h5>
+                    <p class="text-muted mb-0">Bookings</p>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="stat-icon danger mx-auto mb-2">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h5>{{ total_users }}</h5>
+                    <p class="text-muted mb-0">Users</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

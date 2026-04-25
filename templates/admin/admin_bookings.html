@@ -1,0 +1,298 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Booking Management{% endblock %}
+
+{% block page_title %}Booking Management{% endblock %}
+
+{% block content %}
+<!-- Filter Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>All Bookings</h4>
+                <div class="d-flex gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter me-2"></i>
+                            {% if status_filter %}
+                                Status: {{ status_filter }}
+                            {% else %}
+                                All Status
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="?">All Status</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for status, label in status_choices %}
+                                <li><a class="dropdown-item" href="?status={{ status }}">{{ label }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if page_obj.object_list %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>User</th>
+                        <th>Hotel</th>
+                        <th>Room</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Guests</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in page_obj.object_list %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-primary">#{{ booking.id }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-info d-flex align-items-center justify-content-center me-2" 
+                                     style="width: 30px; height: 30px;">
+                                    <i class="fas fa-user text-white" style="font-size: 12px;"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ booking.user.get_full_name|default:booking.user.username }}</div>
+                                    <small class="text-muted">{{ booking.user.email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-2" 
+                                     style="width: 30px; height: 30px;">
+                                    <i class="fas fa-hotel text-white" style="font-size: 12px;"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ booking.hotel.name }}</div>
+                                    <small class="text-muted">Hotel</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-success d-flex align-items-center justify-content-center me-2" 
+                                     style="width: 30px; height: 30px;">
+                                    <i class="fas fa-bed text-white" style="font-size: 12px;"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ booking.room.get_room_type_display }}</div>
+                                    <small class="text-muted">{{ booking.room.room_number }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ booking.check_in|date:"M d, Y" }}</div>
+                            <small class="text-muted">{{ booking.check_in|date:"D" }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ booking.check_out|date:"M d, Y" }}</div>
+                            <small class="text-muted">{{ booking.check_out|date:"D" }}</small>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users text-muted me-2"></i>
+                                <span>{{ booking.room.capacity }} guests</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success">₹{{ booking.total_amount|floatformat:0 }}</div>
+                            <small class="text-muted">{{ booking.nights }} nights</small>
+                        </td>
+                        <td>
+                            {% if booking.status == 'Pending' %}
+                                <span class="badge bg-warning">{{ booking.status }}</span>
+                            {% elif booking.status == 'Confirmed' %}
+                                <span class="badge bg-success">{{ booking.status }}</span>
+                            {% elif booking.status == 'Cancelled' %}
+                                <span class="badge bg-danger">{{ booking.status }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ booking.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                {% if booking.status == 'Pending' %}
+                                    <a href="{% url 'admin_panel:admin_confirm_booking' booking.id %}" 
+                                       class="btn btn-sm btn-outline-success" 
+                                       title="Confirm Booking"
+                                       onclick="return confirm('Confirm this booking?')">
+                                        <i class="fas fa-check"></i>
+                                    </a>
+                                {% endif %}
+                                {% if booking.status == 'Confirmed' %}
+                                    <a href="{% url 'admin_panel:admin_cancel_booking' booking.id %}" 
+                                       class="btn btn-sm btn-outline-warning" 
+                                       title="Cancel Booking"
+                                       onclick="return confirm('Cancel this booking?')">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                {% endif %}
+                                {% if booking.status != 'Pending' %}
+                                    <a href="{% url 'admin_panel:admin_pending_booking' booking.id %}" 
+                                       class="btn btn-sm btn-outline-info" 
+                                       title="Mark as Pending"
+                                       onclick="return confirm('Mark this booking as pending?')">
+                                        <i class="fas fa-clock"></i>
+                                    </a>
+                                {% endif %}
+                                <a href="{% url 'admin_panel:admin_delete_booking' booking.id %}" 
+                                   class="btn btn-sm btn-outline-danger" 
+                                   title="Delete Booking"
+                                   onclick="return confirm('Delete this booking permanently?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav aria-label="Booking pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-calendar-check fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Bookings Found</h4>
+            <p class="text-muted">
+                {% if status_filter %}
+                    No bookings with "{{ status_filter }}" status found.
+                {% else %}
+                    No bookings found in the system.
+                {% endif %}
+            </p>
+            <div class="d-flex justify-content-center gap-2">
+                {% if status_filter %}
+                    <a href="{% url 'admin_panel:admin_bookings' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>View All Bookings
+                    </a>
+                {% else %}
+                    <a href="{% url 'admin_panel:admin_add_hotel' %}" class="btn btn-primary">
+                        <i class="fas fa-hotel me-2"></i>Add Hotels First
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Statistics Overview -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <div class="stat-icon warning">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-value">{{ pending_bookings }}</div>
+            <div class="stat-label">Pending Bookings</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <div class="stat-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-value">{{ confirmed_bookings }}</div>
+            <div class="stat-label">Confirmed Bookings</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card danger">
+            <div class="stat-icon danger">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-value">{{ cancelled_bookings }}</div>
+            <div class="stat-label">Cancelled Bookings</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card primary">
+            <div class="stat-icon primary">
+                <i class="fas fa-calendar"></i>
+            </div>
+            <div class="stat-value">{{ total_bookings }}</div>
+            <div class="stat-label">Total Bookings</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="table-container">
+            <h5 class="mb-3">Quick Actions</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'admin_panel:admin_bookings' %}?status=Pending" class="action-btn btn-warning">
+                    <i class="fas fa-clock"></i> View Pending ({{ pending_bookings }})
+                </a>
+                <a href="{% url 'admin_panel:admin_bookings' %}?status=Confirmed" class="action-btn btn-success">
+                    <i class="fas fa-check-circle"></i> View Confirmed ({{ confirmed_bookings }})
+                </a>
+                <a href="{% url 'admin_panel:admin_bookings' %}?status=Cancelled" class="action-btn btn-danger">
+                    <i class="fas fa-times-circle"></i> View Cancelled ({{ cancelled_bookings }})
+                </a>
+                <a href="{% url 'admin_panel:admin_hotels' %}" class="action-btn btn-primary">
+                    <i class="fas fa-hotel"></i> Manage Hotels
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh pending bookings every 30 seconds
+    if (window.location.search.includes('status=Pending')) {
+        setTimeout(() => {
+            window.location.reload();
+        }, 30000);
+    }
+});
+</script>
+{% endblock %}
